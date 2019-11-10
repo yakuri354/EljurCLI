@@ -4,7 +4,6 @@ from colored import fg, stylize, attr
 import requests as rq
 import datetime
 
-
 primary_calendar_id = "yakuri2006@gmail.com"
 eljur_calendar_id = "6sorgqebejho8m0cpof065eja8@group.calendar.google.com"
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
@@ -18,6 +17,7 @@ time_style = fg("green") + attr("bold")
 separator_style = fg("medium_purple_1") + attr("bold")
 nonacadem_style = fg("red")
 separator = stylize("::", separator_style)
+
 
 class Lesson_Event:
     def __init__(self, date, time, TZ="Europe/Moscow"):
@@ -37,11 +37,13 @@ class Lesson_Event:
         self.__date_to_google_format()
         return self.date + self.endtime + self.tz
 
+
 def output_time(time):
     start, end = time.split("_")
     start = start[:5]
     end = end[:5]
     return start + "-" + end
+
 
 token = eljur_login()
 creds = google_login()
@@ -49,7 +51,6 @@ creds = google_login()
 diary_params = {"student": student_id, "days": "20191104-20191109", "rings": include_non_academ,
                 "devkey": devkey, "out_format": "json",
                 "auth_token": token, "vendor": "markbook"}
-
 
 time_sort = {10: "08:30:00_09:10:00", 20: "09:30:00_10:10:00", 30: "10:20:00_11:00:00", 40: "11:10:00_11:50:00",
              50: "12:00:00_12:40:00", 60: "13:30:00_14:10:00", 70: "14:20:00_15:00:00", 80: "15:10:00_15:50:00",
@@ -77,21 +78,26 @@ for d in schedule["days"]:
         i = current_schedule["items"][str(i)]
         if not i.get("starttime"):
             if i["room"] != "":
-                print("     {0} {1} {2} в кабинете {3}".format(stylize(output_time(time_sort[int(i["sort"])]), time_style), separator, i["name"], i["room"]))
+                print("     {0} {1} {2} в кабинете {3}".format(
+                    stylize(output_time(time_sort[int(i["sort"])]), time_style), separator, i["name"], i["room"]))
                 # print(Lesson_Event(today, time_sort[int(i["sort"])]).start_google_format())
             else:
-                print("     {0} {1} {2}".format(stylize(output_time(time_sort[int(i["sort"])]), time_style), separator, i["name"]))
+                print("     {0} {1} {2}".format(stylize(output_time(time_sort[int(i["sort"])]), time_style), separator,
+                                                i["name"]))
         else:
             if i["room"] != "":
-                print("     {0} {1} {2} в кабинете {3}".format(stylize(output_time(i["starttime"] + "_" + i["endtime"]), time_style), separator, i["name"], i["room"]))
+                print("     {0} {1} {2} в кабинете {3}".format(
+                    stylize(output_time(i["starttime"] + "_" + i["endtime"]), time_style), separator, i["name"],
+                    i["room"]))
                 # print(Lesson_Event(today, time_sort[int(i["sort"])]).start_google_format())
             else:
-                print("     {0} {1} {2}".format(stylize(output_time(i["starttime"] + "_" + i["endtime"]), time_style), separator, i["name"]))
+                print("     {0} {1} {2}".format(stylize(output_time(i["starttime"] + "_" + i["endtime"]), time_style),
+                                                separator, i["name"]))
     if current_schedule.get("items_extday"):
         print(stylize("\n Внеакадем:\n", nonacadem_style))
         for v in range(len(current_schedule["items_extday"])):
             v = current_schedule["items_extday"][v]
-            print("     {0} {1} {2}".format(stylize(output_time(v["starttime"] + "_" + v["endtime"]), time_style), separator, v["name"]))
+            print("     {0} {1} {2}".format(stylize(output_time(v["starttime"] + "_" + v["endtime"]), time_style),
+                                            separator, v["name"]))
     else:
         print(stylize("\n Внеакадем отсутствует", nonacadem_style))
-

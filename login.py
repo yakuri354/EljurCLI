@@ -20,7 +20,7 @@ def google_login():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                'users.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
@@ -32,7 +32,7 @@ def google_login():
 
 
 def eljur_login():
-    with open("credentials.json", "r") as creds:
+    with open("users.json", "r") as creds:
         logged_users = json.load(creds)
     eljur_auth_choice = [{"type": "list", "message": "Select your username",
                              "name": "auth_choice", "default": 1,
@@ -57,7 +57,7 @@ def eljur_login():
         if auth_response["response"]["state"] != 200 or "200":
             print("Error: " + auth_response["response"]["error"])
         token = auth_response['response']['result']['token']
-        with open("credentials.json", "w") as write_creds:
+        with open("users.json", "w") as write_creds:
             json.dump({login: token}, write_creds)
         return token
     else:
@@ -65,4 +65,4 @@ def eljur_login():
         return token
 
 def get_rules(token):
-    
+    pass
