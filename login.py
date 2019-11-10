@@ -1,12 +1,12 @@
 import pickle
 import os.path
-import PyInquirer as pq
 import json
+import PyInquirer as pq
 import requests as rq
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-credentials_eljur = open('credentials_eljur.txt')
+from EljurSched import devkey
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 
@@ -20,7 +20,7 @@ def google_login():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'users.json', SCOPES)
+                'google_credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
@@ -47,7 +47,6 @@ def eljur_login():
     while not answer.get("auth_choice"):
         answer = pq.prompt(eljur_auth_choice)
     login = answer["auth_choice"]
-    devkey = "9235e26e80ac2c509c48fe62db23642c"
     if login not in logged_users.keys():
         login = pq.prompt(eljur_login_input)['login']
         password = pq.prompt(eljur_password_input)['password']
@@ -63,6 +62,3 @@ def eljur_login():
     else:
         token = logged_users[login]
         return token
-
-def get_rules(token):
-    pass

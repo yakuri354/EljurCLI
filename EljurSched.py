@@ -8,6 +8,7 @@ primary_calendar_id = "yakuri2006@gmail.com"
 eljur_calendar_id = "6sorgqebejho8m0cpof065eja8@group.calendar.google.com"
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 devkey = "9235e26e80ac2c509c48fe62db23642c"
+apiurl = "https://markbook.eljur.ru/apiv3/"
 include_non_academ = "true"
 student_id = "6461"
 today = datetime.datetime.now().__str__()[:10]
@@ -17,6 +18,17 @@ time_style = fg("green") + attr("bold")
 separator_style = fg("medium_purple_1") + attr("bold")
 nonacadem_style = fg("red")
 separator = stylize("::", separator_style)
+
+token = eljur_login()
+# creds = google_login()
+
+
+rules_params = {"devkey": devkey, "out_format": "json",
+                "auth_token": token, "vendor": "markbook"}
+
+time_sort = {10: "08:30:00_09:10:00", 20: "09:30:00_10:10:00", 30: "10:20:00_11:00:00", 40: "11:10:00_11:50:00",
+             50: "12:00:00_12:40:00", 60: "13:30:00_14:10:00", 70: "14:20:00_15:00:00", 80: "15:10:00_15:50:00",
+             90: "16:20:00_17:00:00", 100: "17:10:00_17:50:00", 110: "18:00:00_18:40:00"}
 
 
 class Lesson_Event:
@@ -38,29 +50,29 @@ class Lesson_Event:
         return self.date + self.endtime + self.tz
 
 
+class Student:
+    def __init__(self):
+        pass
+
+
 def output_time(time):
     start, end = time.split("_")
     start = start[:5]
     end = end[:5]
     return start + "-" + end
 
-
-token = eljur_login()
-creds = google_login()
-
-diary_params = {"student": student_id, "days": "20191104-20191109", "rings": include_non_academ,
-                "devkey": devkey, "out_format": "json",
-                "auth_token": token, "vendor": "markbook"}
-
-time_sort = {10: "08:30:00_09:10:00", 20: "09:30:00_10:10:00", 30: "10:20:00_11:00:00", 40: "11:10:00_11:50:00",
-             50: "12:00:00_12:40:00", 60: "13:30:00_14:10:00", 70: "14:20:00_15:00:00", 80: "15:10:00_15:50:00",
-             90: "16:20:00_17:00:00", 100: "17:10:00_17:50:00", 110: "18:00:00_18:40:00"}
+response = rq.get(apiurl + "getrules", params=rules_params)["response"]
+result = response["result"]
 
 # service = build('calendar', 'v3', credentials=creds)
 # calendar = service.calendars().get(calendarId=primary_calendar_id).execute()
 # events = service.events().list(calendarId=primary_calendar_id).execute()
 
-diary = rq.get("https://markbook.eljur.ru/apiv3/getschedule", params=diary_params).json()['response']
+diary_params = {"student": student_id, "days": "20191104-20191109", "rings": include_non_academ,
+                "devkey": devkey, "out_format": "json",
+                "auth_token": token, "vendor": "markbook"}
+
+diary = rq.get(apiurl + "getschedule", params=diary_params).json()['response']
 if diary["error"] is not None:
     print("Error: " + diary["error"])
     raise ValueError
