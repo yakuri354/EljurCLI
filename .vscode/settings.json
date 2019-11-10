@@ -1,0 +1,16 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "cSpell.words": [
+        "cpof",
+        "creds",
+        "eljur",
+        "gmail",
+        "sorgqebejho",
+        "yakuri"
+    ]
+}
