@@ -1,28 +1,44 @@
+from pyfiglet import Figlet
+from yaspin import yaspin
+version = "0.4beta"
+print("Добро пожаловать в")
+print(Figlet().renderText("Eljur CLI"))
+print("вер. " + version)
+spinner = yaspin(text="[Загрузка модулей...]")
+spinner.start()
 from googleapiclient.discovery import build
 from login import google_login, eljur_login
 from colored import fg, stylize, attr
+import PyInquirer as pq
 import requests as rq
 import datetime
-
 primary_calendar_id = "yakuri2006@gmail.com"
 eljur_calendar_id = "6sorgqebejho8m0cpof065eja8@group.calendar.google.com"
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 devkey = "9235e26e80ac2c509c48fe62db23642c"
 apiurl = "https://markbook.eljur.ru/apiv3/"
+version = "0.4beta"
 include_non_academ = "true"
-student_id = "6461"
 today = datetime.datetime.now().__str__()[:10]
-print(today)
 lessons = []
+non_academ_prompt = {"type": "confirm", "name": "non_academ_prompt",
+                     "message": "Хотите включить в расписание внеакадем?"}
 time_style = fg("green") + attr("bold")
+day_of_week_style = fg("orange_1") + attr("bold")
 separator_style = fg("medium_purple_1") + attr("bold")
-nonacadem_style = fg("red")
+room_style = fg("yellow") + attr("bold")
+nonacadem_style = fg("cyan")
 separator = stylize("::", separator_style)
-
+spinner.text = ""
+spinner.ok(stylize("[Модули успешно загружены!]", fg("green")))
 token = eljur_login()
-# creds = google_login()
+# service = google_login()
 
-
+if pq.prompt(non_academ_prompt)["non_academ_prompt"]:
+    include_non_academ = "true"
+else:
+    include_non_academ = "false"
+loadspinner = yaspin(text="Загрузка...")
 rules_params = {"devkey": devkey, "out_format": "json",
                 "auth_token": token, "vendor": "markbook"}
 
@@ -61,26 +77,30 @@ def output_time(time):
     end = end[:5]
     return start + "-" + end
 
-response = rq.get(apiurl + "getrules", params=rules_params)["response"]
-result = response["result"]
-
-# service = build('calendar', 'v3', credentials=creds)
+userinfo = rq.get(apiurl + "getrules", params=rules_params).json()["response"]
+inforesult = userinfo["result"]
+student_id = list(inforesult["relations"]["students"].keys())[0]
+vendor = inforesult["relations"]["schools"][0]["number"]
 # calendar = service.calendars().get(calendarId=primary_calendar_id).execute()
 # events = service.events().list(calendarId=primary_calendar_id).execute()
 
 diary_params = {"student": student_id, "days": "20191104-20191109", "rings": include_non_academ,
                 "devkey": devkey, "out_format": "json",
-                "auth_token": token, "vendor": "markbook"}
-
+                "auth_token": token, "vendor": vendor}
+loadspinner.text = "[Получение дневника из журнала...]"
 diary = rq.get(apiurl + "getschedule", params=diary_params).json()['response']
 if diary["error"] is not None:
-    print("Error: " + diary["error"])
+    spinner.text = ""
+    spinner.fail("Ошибка!")
+    print("Ошибка: " + diary["error"])
     raise ValueError
 schedule = diary['result']['students'][str(student_id)]
+loadspinner.text = ""
+loadspinner.ok(stylize("[Расписание успешно получено!] ", fg("green")))
 for d in schedule["days"]:
     d = schedule["days"][d]
     current_schedule = d
-    print("\n" + d["title"] + " \n")
+    print(stylize("\n" + d["title"] + " \n", day_of_week_style))
     for i in range(len(current_schedule["items"]) + 1):
         if i == 0:
             continue
@@ -90,8 +110,8 @@ for d in schedule["days"]:
         i = current_schedule["items"][str(i)]
         if not i.get("starttime"):
             if i["room"] != "":
-                print("     {0} {1} {2} в кабинете {3}".format(
-                    stylize(output_time(time_sort[int(i["sort"])]), time_style), separator, i["name"], i["room"]))
+                print("\t     {0} {1} {2} в кабинете {3}".format(
+                    stylize(output_time(time_sort[int(i["sort"])]), time_style), separator, i["name"], stylize(i["room"], room_style)))
                 # print(Lesson_Event(today, time_sort[int(i["sort"])]).start_google_format())
             else:
                 print("     {0} {1} {2}".format(stylize(output_time(time_sort[int(i["sort"])]), time_style), separator,
@@ -100,7 +120,7 @@ for d in schedule["days"]:
             if i["room"] != "":
                 print("     {0} {1} {2} в кабинете {3}".format(
                     stylize(output_time(i["starttime"] + "_" + i["endtime"]), time_style), separator, i["name"],
-                    i["room"]))
+                    stylize(i["room"], room_style)))
                 # print(Lesson_Event(today, time_sort[int(i["sort"])]).start_google_format())
             else:
                 print("     {0} {1} {2}".format(stylize(output_time(i["starttime"] + "_" + i["endtime"]), time_style),
