@@ -1,16 +1,28 @@
-from pyfiglet import Figlet
 from yaspin import yaspin
-version = "0.4beta"
-print("Добро пожаловать в")
-print(Figlet().renderText("Eljur CLI"))
-print("вер. " + version)
-spinner = yaspin(text="[Загрузка модулей...]")
-spinner.start()
-from googleapiclient.discovery import build
-from login import google_login, eljur_login
 from colored import fg, stylize, attr
+from googleapiclient.discovery import build
+from login import google_login, eljur_login, login
 import PyInquirer as pq
 import requests as rq
+
+version = "0.4beta"
+print(stylize("""
+    ╭────────────────────────────────────────────────────────────────╮
+    │ Добро пожаловать в                                             │
+    │             _____ _  _             ____ _     ___              │
+    │            | ____| |(_)_   _ _ __ / ___| |   |_ _|             │
+    │            |  _| | || | | | | '__| |   | |    | |              │
+    │            | |___| || | |_| | |  | |___| |___ | |              │
+    │            |_____|_|/ |\__,_|_|   \____|_____|___|             │
+    │                |__/                                            │
+    │ вер. {}                                                   │
+    ╰────────────────────────────────────────────────────────────────╯
+
+""".format(version), fg(""), attr("bold")))
+
+spinner = yaspin(text="[Загрузка модулей...]")
+spinner.start()
+
 import datetime
 primary_calendar_id = "yakuri2006@gmail.com"
 eljur_calendar_id = "6sorgqebejho8m0cpof065eja8@group.calendar.google.com"

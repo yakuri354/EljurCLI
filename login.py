@@ -34,7 +34,8 @@ def google_login():
 
     return service
 
-def login():
+def login(*args):
+    print(args)
     with open("users.json", "r") as creds:
         logged_users = json.load(creds)
 
@@ -82,38 +83,55 @@ def eljur_login():
     with open("users.json", "r") as creds:
         logged_users = json.load(creds)
 
-    eljur_auth_choice = 
-    [{
+    eljur_auth_choice = [{
         "type": "list",
         "message": "Выберите пользователя:",
         "name": "auth_choice", "default": 1,
         "choices": []
     }]
-    eljur_login_input = 
-    [{
+    eljur_login_input = [{
         "type": "input",
         "name": "login",
         "message":"Введите логин:"
     }]
-    eljur_password_input = [{"type": "password", "name": "password", "message":"Введите пароль:"}]
+    eljur_password_input = [{
+        "type": "password",
+        "name": "password",
+        "message":"Введите пароль:"
+    }]
     usernames = list(logged_users.keys())
+
     for i in range(len(usernames)):
         eljur_auth_choice[0]["choices"].append({"name": usernames[i]})
-    eljur_auth_choice[0]["choices"].append({"name": "Добавить пользователя"})
+
+    eljur_auth_choice[0]["choices"].append(
+        {"name": "Добавить пользователя"})
+
     answer = {}
+
     while not answer.get("auth_choice"):
         answer = pq.prompt(eljur_auth_choice)
+    
     login = answer["auth_choice"]
+
     if login not in logged_users.keys():
         login = pq.prompt(eljur_login_input)['login']
         password = pq.prompt(eljur_password_input)['password']
-        auth_params = {"devkey": devkey, "out_format": "json", "vendor": "markbook", "login": login,
-                       "password": password}
+        auth_params = {
+        "devkey": devkey,
+        "out_format": "json",
+        "vendor": "markbook",
+        "login": login,
+        "password": password
+        }
         auth_response = rq.get("https://markbook.eljur.ru/apiv3/auth", params=auth_params).json()
+
         if auth_response["response"]["error"] is not None:
             print("Error: " + auth_response["response"]["error"])
+        
         token = auth_response['response']['result']['token']
         logged_users[login] = token
+
         with open("users.json", "w") as write_creds:
             json.dump(logged_users, write_creds)
         return token
