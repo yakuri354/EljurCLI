@@ -1,6 +1,7 @@
 import PyInquirer as pq
 
 from google_login import *
+from ics_export import *
 from eljur_login import *
 from eljur import *
 
@@ -136,7 +137,8 @@ def menu(current_student):
         print(current_student)
         menu(current_student)
     elif answer == "export":
-        print("Уже скоро!")
+        export_lessons(current_student.get_schedule(), "exported_lessons.ics")
+        export_curriculum(current_student.get_schedule(), "exported_curriculum.ics")
         menu(current_student)
 
 
