@@ -42,62 +42,68 @@ def output_time(time):
     return start + "-" + end
 
 
+def time_from_sched(lesson):
+    time_str = stylize(output_time(lesson["starttime"] +
+                                        "_" + lesson["endtime"]),
+                                            time_style)
+    return time_str
+
+
 # Получение календаря из гугла
 # calendar = service.calendars().get(calendarId=primary_calendar_id).execute()
 # events = service.events().list(calendarId=primary_calendar_id).execute()
 
 
 # TODO: Переписать вывод расписания
-def list_schedule(schedule=None, student=None, include_non_academ=None):
-    if not include_non_academ:
+def list_schedule(schedule, include_non_academ=None):
+    if include_non_academ ==  None:
         include_non_academ = pq.prompt(
             {
                 "type": "confirm",
                 "name": "non_academ_prompt",
                 "message": "Хотите включить в расписание внеакадем?"
-            })["non_academ_prompt"]
-            
-    if student and not schedule:
-        schedule = student.get_schedule(silent=False)
-    elif not student and schedule:
-        raise NotImplementedError("Either schedule or student must be provided")
-    for d in schedule["days"]:
-        d = schedule["days"][d]
-        current_schedule = d
-        print(stylize("\n" + d["title"] + " \n", day_of_week_style))
-        for i in range(len(current_schedule["items"]) + 1):
-            if i == 0:
-                continue
-            # Вывод окна
-            if not current_schedule["items"].get(str(i)):
-                print("     {0} {1} Окно!".format(stylize(output_time(lessons_time[i]),
-                                                          time_style), separator))
-                continue
-            i = current_schedule["items"][str(i)]
-            # Вывод уроков с учетом кабинета
-            if i["room"] is not None or "":
-                print("     {0} {1} {2} в кабинете {3}".format(
-                    stylize(output_time(i["starttime"] +
-                                        "_" + i["endtime"]),
-                            time_style), separator, i["name"],
-                    stylize(i["room"], room_style)))
-                # print(Lesson_Event(today, time_sort[int(i["sort"])]).start_google_format())
+            }
+        )["non_academ_prompt"]
+    for day in schedule["days"]:
+        day = schedule["days"][day]
+        lessons = day["items"]
+
+        last_lesson = max(map(int, list( day["items"].keys())))
+        print("\n" + day["title"] + ":\n")
+        for lesson in range(1, last_lesson + 1):
+            lesson = str(lesson)
+            if lessons.get(lesson) == None:
+                print("\t{time} {sep} Окно!".format(
+                    time = stylize(output_time(lessons_time[lesson]), time_style),
+                    sep = separator))
             else:
-                print("     {0} {1} {2}".format(stylize(output_time(i["starttime"] +
-                                                                    "_" + i["endtime"]),
-                                                        time_style), separator, i["name"]))
-
-        # Вывод внеакадема
-        if current_schedule.get("items_extday") and include_non_academ:
-            print(stylize("\n Внеакадем:\n", non_academ_style))
-
-            for v in range(len(current_schedule["items_extday"])):
-                v = current_schedule["items_extday"][v]
-                print("     {0} {1} {2}".format(stylize(output_time(v["starttime"] + "_" + v["endtime"]),
-                                                        time_style), separator, v["name"]))
-        elif include_non_academ:
-            print(stylize("\n Внеакадем отсутствует", non_academ_style))
-
+                if lessons[lesson].get("room"):
+                    print("\t{time} {sep} {lesson_name} в кабинете {room}".format(
+                                time = time_from_sched(lessons[lesson]),
+                                sep = separator,
+                                lesson_name = lessons[lesson]["name"],
+                                room = stylize(lessons[lesson]["room"], room_style)
+                            )
+                        )
+                else:
+                    print("\t{time} {sep} {lesson_name}".format(
+                            time = time_from_sched(lessons[lesson]),
+                            sep = separator,
+                            lesson_name = lessons[lesson]["name"],
+                        )
+                    )
+        if include_non_academ:
+            if day.get("items_extday"):
+                print(stylize("\n Внеакадем: \n", non_academ_style))
+                for curriculum in day["items_extday"]:
+                    print("\t{time} {sep} {name}".format(
+                        time = time_from_sched(curriculum),
+                        sep =  separator, 
+                        name = curriculum["name"])
+                    )
+            else:
+                print(stylize("\n Внеакадем отсутствует\n", non_academ_style))
+    
 
 def menu(current_student):
     main_menu = {
@@ -130,7 +136,7 @@ def menu(current_student):
     if answer == "exit":
         exit()
     elif answer == "schedule":
-        list_schedule(student=current_student)
+        list_schedule(current_student.get_schedule())
         menu(current_student)
     elif answer == "info":
         # TODO: Написать нормальный вывод инфы об ученике
