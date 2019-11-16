@@ -88,7 +88,7 @@ def list_schedule(schedule, include_non_academ=None):
                     )
         if include_non_academ:
             if day.get("items_extday"):
-                print(stylize("\n  Внеакадем: \n", non_academ_style))
+                print(stylize("\n    Внеакадем: \n", non_academ_style))
                 for curriculum in day["items_extday"]:
                     print("\t{time} {sep} {name}".format(
                         time=time_from_sched(curriculum),
@@ -96,7 +96,7 @@ def list_schedule(schedule, include_non_academ=None):
                         name=curriculum["name"])
                     )
             else:
-                print(stylize("\n Внеакадем отсутствует\n", non_academ_style))
+                print(stylize("\n    Внеакадем отсутствует\n", non_academ_style))
 
 
 def menu(current_student):
