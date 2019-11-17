@@ -78,8 +78,7 @@ def list_schedule(schedule, include_non_academ=None):
                         sep=separator,
                         lesson_name=lessons[lesson]["name"],
                         room=stylize(lessons[lesson]["room"], room_style)
-                    )
-                    )
+                    ))
                 else:
                     print("\t{time} {sep} {lesson_name}".format(
                         time=time_from_sched(lessons[lesson]),
@@ -137,8 +136,7 @@ def menu(current_student):
         print(current_student)
         menu(current_student)
     elif answer == "export":
-        export_lessons(current_student.get_schedule(), "exported_lessons.ics")
-        export_curriculum(current_student.get_schedule(), "exported_curriculum.ics")
+        print(export_schedule(current_student.get_schedule()))
         menu(current_student)
 
 

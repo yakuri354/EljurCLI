@@ -1,4 +1,5 @@
 from ics import Calendar, Event
+import PyInquirer as pq
 import os
 
 from eljur import *
@@ -42,14 +43,14 @@ def export_lessons(schedule, path):
 
             lessons_calendar.events.add(lesson_event)
 
-    os.chdir(os.path.expanduser("~") + "/Documents/")
+    os.chdir(path)
 
-    with open(path, 'w') as calendar_file:
+    with open("exported_lessons.ics", 'w') as calendar_file:
         calendar_file.writelines(lessons_calendar)
 
 
 def export_curriculum(schedule, path):
-    curriculums_calendar = Calendar()
+    curriculum_calendar = Calendar()
 
     for day in schedule["days"]:
         day = schedule["days"][day]
@@ -62,9 +63,99 @@ def export_curriculum(schedule, path):
                                                                               curriculum["starttime"] + "_" +
                                                                               curriculum["endtime"])
 
-                curriculums_calendar.events.add(curriculum_event)
+                curriculum_calendar.events.add(curriculum_event)
 
-            os.chdir(os.path.expanduser("~") + "/Documents/")
+            os.chdir(path)
 
-            with open(path, 'w') as calendar_file:
-                calendar_file.writelines(curriculums_calendar)
+            with open("exported_curriculum.ics", 'w') as calendar_file:
+                calendar_file.writelines(curriculum_calendar)
+
+
+def export_schedule(schedule):
+    answers = pq.prompt(
+        [
+            {
+                'type': 'checkbox',
+                'message': "Файлы для эккспорта: ",
+                'name': 'files_to_export',
+                'choices': [
+                    {
+                        'name': 'Уроки',
+                        'value': "exported_lessons.ics"
+                    },
+                    {
+                        'name': 'Внеакадемы',
+                        'value': 'exported_curriculum.ics'
+                    }
+                ]
+            }
+        ]
+    )
+
+    path_prompt = [
+        {
+            'type': 'input',
+            'name': 'path',
+            'message': 'Куда вы хотие экспортировать (Введите полный путь)',
+            'default': os.path.expanduser('~') + '/Documents/'
+        }
+    ]
+
+    files = answers['files_to_export']
+
+    if len(answers['files_to_export']) == 1:
+
+        confirmed = pq.prompt(
+            {
+                "type": "confirm",
+                "name": "confirmed",
+                "message": "Будет экспортирован 1 файл: {0}. Продолжть?".format(files[0])
+            }
+        )["confirmed"]
+
+        if not confirmed:
+            return "Па пречине пидорас"
+
+        answers['path'] = pq.prompt(path_prompt)['path']
+
+        if files == ['exported_lessons.ics']:
+            try:
+                export_lessons(schedule, answers['path'])
+            except:
+                return "Ошибка экспорта"
+        elif files == ['exported_curriculum.ics']:
+            try:
+                export_curriculum(schedule, answers['path'])
+            except:
+                return "Ошибка экспорта"
+
+    elif len(answers['files_to_export']) == 2:
+        confirmed = pq.prompt(
+            {
+                "type": "confirm",
+                "name": "confirmed",
+                "message": "Будет экспортированно 2 файла: {0}, {1}. Продолжть?".format(files[0], files[1])
+            }
+        )["confirmed"]
+
+        if not confirmed:
+            return "Па пречине пидорас"
+
+        answers['path'] = pq.prompt(path_prompt)['path']
+
+        try:
+            export_lessons(schedule, answers['path'])
+            export_curriculum(schedule, answers['path'])
+        except:
+            return "Ошибка экспорта"
+
+    else:
+        print("Отмена")
+        return "Па пречине пидорас"
+
+    return "Файлы успешно экспортированны"
+
+
+if __name__ == "__main__":
+    schedule = ""
+    export_schedule(schedule)
