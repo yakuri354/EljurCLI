@@ -1,35 +1,5 @@
-import PyInquirer as pq
-
-from google_login import *
-from ics_export import *
 from eljur_login import *
-from eljur import *
-
-
-# Класс для хранения и перевода урока в событие гугла
-class LessonEvent:
-    def __init__(self, date, time, name, room=None, topic=None, time_zone="Europe/Moscow"):
-        self.name = name
-        if topic:
-            self.topic = topic
-        if room:
-            self.room = room
-        if time_zone == "Europe/Moscow":
-            self.time_zone = "+03:00"
-        self.date = date
-        self.start_time, self.end_time = time.split("_")
-
-    def __date_to_google_format(self):
-        self.date.replace("-", "")
-        self.date += "T"
-
-    def start_google_format(self):
-        self.__date_to_google_format()
-        return self.date + self.start_time + self.time_zone
-
-    def end_google_format(self):
-        self.__date_to_google_format()
-        return self.date + self.end_time + self.time_zone
+from ics_export import *
 
 
 def output_time(time):
@@ -43,11 +13,6 @@ def time_from_sched(lesson):
     time_str = output_time(time)
 
     return stylize(time_str, time_style)
-
-
-# Получение календаря из гугла
-# calendar = service.calendars().get(calendarId=primary_calendar_id).execute()
-# events = service.events().list(calendarId=primary_calendar_id).execute()
 
 
 def list_schedule(schedule, include_non_academ=None):

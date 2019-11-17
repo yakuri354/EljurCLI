@@ -18,7 +18,6 @@ greeting = stylize("""
 
 """, fg("magenta"), attr("bold"))
 
-
 API_URL = "https://markbook.eljur.ru/apiv3/"
 DEVKEY = "9235e26e80ac2c509c48fe62db23642c"
 VENDOR = "markbook"
@@ -91,7 +90,7 @@ class Student:
         text += "\nКласс: " + str(self.grade)
         text += "\nГород: " + self.city
         text += "\nШкола: " + self.school
-        text += "\nПол: " + "Муж." if self.gender == "male" else "Жен"
+        text += "\nПол: " + "Мужской" if self.gender == "male" else "Женский"
         text += "\nЛогин: " + self.login
         text += "\nЭл. Почта: " + self.email
 
