@@ -1,0 +1,4 @@
+# Run pip install -r [PATH TO THIS FILE]
+PyInquirer
+requests
+ics

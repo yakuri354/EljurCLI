@@ -3,6 +3,9 @@ import PyInquirer as pq
 import os
 
 from eljur import *
+# import pytz
+# from icalendar import Calendar as iCalendar
+# from pytz import timezone
 
 
 def convert_to_ics(eljur_date, eljur_time):
@@ -43,12 +46,19 @@ def export_lessons(schedule, path):
 
             lessons_calendar.events.add(lesson_event)
 
+    
+    print(lessons_calendar)
+
     os.chdir(path)
 
     with open("exported_lessons.ics", 'w') as calendar_file:
-        calendar_file.writelines(lessons_calendar)
+        calendar_file.writelines(lessons_calendar).replace(":00Z", ":00")
 
 
+def to_local_timezone(raw_calendar):
+    return raw_calendar.replace(":00Z", "00")
+
+    
 def export_curriculum(schedule, path):
     curriculum_calendar = Calendar()
 
@@ -69,6 +79,34 @@ def export_curriculum(schedule, path):
 
             with open("exported_curriculum.ics", 'w') as calendar_file:
                 calendar_file.writelines(curriculum_calendar)
+
+
+# def convert_time_zone(raw_calendar, timezone="Europe/Moscow"):
+#     print("Started timezone conversion...")
+#     cal = iCalendar.from_ical(raw_calendar)
+    
+#     try:
+#         newtz = timezone(timezone)
+#     except pytz.exceptions.UnknownTimeZoneError:
+#         return ValueError("Invalid timezone")
+
+
+#     oldtz = timezone(cal.get('X-WR-TIMEZONE'))
+
+#     for component in cal.walk():
+#         if component.name == 'VCALENDAR':
+#             component.set('X-WR-TIMEZONE', newtz.zone)
+#         elif component.name == 'VEVENT':
+#             dtstart = component.get('DTSTART')
+#             dtend = component.get('DTEND')
+#             dtstamp = component.get('DTSTAMP')
+#             dtstart.dt = oldtz.localize(dtstart.dt).astimezone(newtz)
+#             dtend.dt = oldtz.localize(dtend.dt).astimezone(newtz)
+#             dtstamp.dt = oldtz.localize(dtstamp.dt).astimezone(newtz)
+
+#     # Блять что ты тут делал нахуй
+
+#     return cal
 
 
 def export_schedule(schedule):
