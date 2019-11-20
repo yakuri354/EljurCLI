@@ -1,11 +1,10 @@
+# coding=utf-8
+
 from ics import Calendar, Event
 import PyInquirer as pq
 import os
 
 from eljur import *
-# import pytz
-# from icalendar import Calendar as iCalendar
-# from pytz import timezone
 
 
 def convert_to_ics(eljur_date, eljur_time):
@@ -46,19 +45,15 @@ def export_lessons(schedule, path):
 
             lessons_calendar.events.add(lesson_event)
 
-    
-    print(lessons_calendar)
-
     os.chdir(path)
 
+    str_calendar = str(lessons_calendar)
+    str_calendar = str_calendar.replace("00Z", "00")
+
     with open("exported_lessons.ics", 'w') as calendar_file:
-        calendar_file.writelines(lessons_calendar).replace(":00Z", ":00")
+        calendar_file.writelines(str_calendar)
 
 
-def to_local_timezone(raw_calendar):
-    return raw_calendar.replace(":00Z", "00")
-
-    
 def export_curriculum(schedule, path):
     curriculum_calendar = Calendar()
 
@@ -77,36 +72,11 @@ def export_curriculum(schedule, path):
 
             os.chdir(path)
 
+            str_calendar = str(curriculum_calendar)
+            str_calendar = str_calendar.replace("00Z", "00")
+
             with open("exported_curriculum.ics", 'w') as calendar_file:
-                calendar_file.writelines(curriculum_calendar)
-
-
-# def convert_time_zone(raw_calendar, timezone="Europe/Moscow"):
-#     print("Started timezone conversion...")
-#     cal = iCalendar.from_ical(raw_calendar)
-    
-#     try:
-#         newtz = timezone(timezone)
-#     except pytz.exceptions.UnknownTimeZoneError:
-#         return ValueError("Invalid timezone")
-
-
-#     oldtz = timezone(cal.get('X-WR-TIMEZONE'))
-
-#     for component in cal.walk():
-#         if component.name == 'VCALENDAR':
-#             component.set('X-WR-TIMEZONE', newtz.zone)
-#         elif component.name == 'VEVENT':
-#             dtstart = component.get('DTSTART')
-#             dtend = component.get('DTEND')
-#             dtstamp = component.get('DTSTAMP')
-#             dtstart.dt = oldtz.localize(dtstart.dt).astimezone(newtz)
-#             dtend.dt = oldtz.localize(dtend.dt).astimezone(newtz)
-#             dtstamp.dt = oldtz.localize(dtstamp.dt).astimezone(newtz)
-
-#     # Блять что ты тут делал нахуй
-
-#     return cal
+                calendar_file.writelines(str_calendar)
 
 
 def export_schedule(schedule):
@@ -152,20 +122,15 @@ def export_schedule(schedule):
         )["confirmed"]
 
         if not confirmed:
-            return "Па пречине пидорас"
+            return "Экспорт отменён"
 
         answers['path'] = pq.prompt(path_prompt)['path']
 
         if files == ['exported_lessons.ics']:
-            try:
-                export_lessons(schedule, answers['path'])
-            except:
-                return "Ошибка экспорта"
+            export_lessons(schedule, answers['path'])
+
         elif files == ['exported_curriculum.ics']:
-            try:
-                export_curriculum(schedule, answers['path'])
-            except:
-                return "Ошибка экспорта"
+            export_curriculum(schedule, answers['path'])
 
     elif len(answers['files_to_export']) == 2:
         confirmed = pq.prompt(
@@ -177,23 +142,14 @@ def export_schedule(schedule):
         )["confirmed"]
 
         if not confirmed:
-            return "Па пречине пидорас"
+            return "Экспорт отменён"
 
         answers['path'] = pq.prompt(path_prompt)['path']
 
-        try:
-            export_lessons(schedule, answers['path'])
-            export_curriculum(schedule, answers['path'])
-        except:
-            return "Ошибка экспорта"
+        export_lessons(schedule, answers['path'])
+        export_curriculum(schedule, answers['path'])
 
     else:
-        print("Отмена")
-        return "Па пречине пидорас"
+        return "Экспорт отменён"
 
     return "Файлы успешно экспортированны"
-
-
-if __name__ == "__main__":
-    schedule = ""
-    export_schedule(schedule)

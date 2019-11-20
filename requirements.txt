@@ -1,4 +1,6 @@
 # Run pip install -r [PATH TO THIS FILE]
 PyInquirer
 requests
+colored
+yaspin
 ics
