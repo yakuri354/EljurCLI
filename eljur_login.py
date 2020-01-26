@@ -3,6 +3,7 @@ from eljur import *
 import PyInquirer as pq
 import requests as rq
 import json
+import os
 
 
 def expired_token():
@@ -11,9 +12,12 @@ def expired_token():
 
 
 def add_user():
-    with open("users.json", "r") as creds:
-        logged_users = json.load(creds)
-
+    with open("users.json", "w+") as creds:
+            if creds.read() == "":
+                creds.write("{}")
+                logged_users = {}
+            else:
+                logged_users = json.load(creds)
     sign_in_promt = pq.prompt([
         {
             "type": "input",
@@ -61,8 +65,12 @@ def add_user():
 
 
 def choose_user():
-    with open("users.json", "r") as creds:
-        logged_users = json.load(creds)
+    with open("users.json", "w+") as creds:
+        if creds.read() == "":
+                creds.write("{}")
+                logged_users = {}
+        else:
+            logged_users = json.load(creds.read())
 
     eljur_auth_choice = [
         {
