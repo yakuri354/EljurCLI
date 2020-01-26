@@ -1,5 +1,5 @@
-*users.json
+users.json
 *.ics
-*.idea
-*.vscode
-*__pycache__
+.idea
+.vscode
+__pycache__

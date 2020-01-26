@@ -29,4 +29,4 @@ Features:
  python3 ./main.py
 ```
 
-### All code is distributed under MIT license
+### This project is licensed under the terms of the MIT license.
